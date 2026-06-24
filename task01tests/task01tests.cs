@@ -52,4 +52,11 @@ public class StringExtensionsTests
         string input = "Ты, милок, иди яром: у дороги мина, за дорогой  огород, а заним и город у моря; иди, коли мыт";
         Assert.True(input.IsPalindrome());
     }
+
+    [Fact]
+    public void IsPalindrome_OnlySpaces_ReturnsFalse()
+    {
+        string input = "         ";
+        Assert.False(input.IsPalindrome());
+    }
 }

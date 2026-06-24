@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace CustomExtention
 {
@@ -6,8 +7,6 @@ namespace CustomExtention
     {
         public static bool IsPalindrome(this string input)
         {
-            if (input.Length == 0) return false;
-            else {
             input = input.ToLower();
             string output="";
             for (int i=0; i<input.Length; i++)
@@ -15,8 +14,8 @@ namespace CustomExtention
                 if (!char.IsPunctuation(input[i]) && !char.IsWhiteSpace(input[i])) output+=input[i];
             }
             
-            return output.SequenceEqual(output.Reverse());
-            }
+            if (output.Length == 0) return false;
+            else return output.SequenceEqual(output.Reverse());
         }
     }
 }
