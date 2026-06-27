@@ -45,7 +45,7 @@ public class StudentServiceTests
         Assert.Equal(2, result[0].Count());
         Assert.Equal("ФИТ", result[0].Key);
         Assert.Equal("ФИТ", result[0].Key);
-        Assert.Equal(1, result[1].Count());
+        Assert.Single(result[1]);
         Assert.Equal("Экономика", result[1].Key);
     }
 
