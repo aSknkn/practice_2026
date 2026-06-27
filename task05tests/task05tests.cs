@@ -61,7 +61,7 @@ public class ClassAnalyzerTests
         var analyzer = new ClassAnalyzer(typeof(AttributedClass));
         bool hasAttribute = analyzer.HasAttribute<SerializableAttribute>();
 
-        Assert.Equal(hasAttribute, true);
+        Assert.True(hasAttribute);
     }
 
     [Fact]
@@ -70,6 +70,6 @@ public class ClassAnalyzerTests
         var analyzer = new ClassAnalyzer(typeof(TestClass));
         bool hasAttribute = analyzer.HasAttribute<SerializableAttribute>();
 
-        Assert.Equal(hasAttribute, false);
+        Assert.False(hasAttribute);
     }
 }
