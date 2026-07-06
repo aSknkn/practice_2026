@@ -2,6 +2,10 @@ using Xunit;
 using task07;
 using System.Reflection;
 
+public class EmptySampleClass
+{
+}
+
 public class AttributeReflectionTests
 {
     [Fact]
@@ -44,11 +48,45 @@ public class AttributeReflectionTests
     [Fact]
     public void ReflectionHelper_CorrectOutput()
     {
-        var result = ReflectionHelper.PrintTypeInfo(typeof(SampleClass));
+        using var sw = new StringWriter();
+        var originalOut = Console.Out;
+        Console.SetOut(sw);
 
-        Assert.Equal("Пример класса", result[0]);
-        Assert.Equal("1/0", result[1]);
-        Assert.Equal("Number - Числовое свойство", result[2]);
-        Assert.Equal("TestMethod - Тестовый метод", result[3]);
+        try
+        {
+            ReflectionHelper.PrintTypeInfo(typeof(SampleClass));
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+        }
+
+        string output = sw.ToString();
+
+        Assert.Contains("Пример класса", output);
+        Assert.Contains("1/0", output);
+        Assert.Contains("Number - Числовое свойство", output);
+        Assert.Contains("TestMethod - Тестовый метод", output);
+    }
+
+    [Fact]
+    public void ReflectionHelper_EmptyOutput_WhenTypeHasNoCustomAttributes()
+    {
+        using var sw = new StringWriter();
+        var originalOut = Console.Out;
+        Console.SetOut(sw);
+
+        try
+        {
+            ReflectionHelper.PrintTypeInfo(typeof(EmptySampleClass));
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+        }
+
+        string output = sw.ToString();
+
+        Assert.Empty(output);
     }
 }

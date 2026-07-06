@@ -41,28 +41,26 @@ public class SampleClass
 
 public static class ReflectionHelper
 {
-    public static List<string> PrintTypeInfo(Type type)
+    public static void PrintTypeInfo(Type type)
     {
         var output = new List<string>();
 
         var attrName = type.GetCustomAttribute<DisplayNameAttribute>();
-        if (attrName!=null) output.Add(attrName.DisplayName);
+        if (attrName!=null) Console.WriteLine(attrName.DisplayName);
 
         var attrVer = type.GetCustomAttribute<VersionAttribute>();
-        if (attrVer!=null) output.Add($"{attrVer.Major}/{attrVer.Minor}");
+        if (attrVer!=null) Console.WriteLine($"{attrVer.Major}/{attrVer.Minor}");
 
         foreach (var prop in type.GetProperties())
         {
             var attrProp = prop.GetCustomAttribute<DisplayNameAttribute>();
-            if (attrProp!=null) output.Add($"{prop.Name} - {attrProp.DisplayName}");
+            if (attrProp!=null) Console.WriteLine($"{prop.Name} - {attrProp.DisplayName}");
         }
 
         foreach (var method in type.GetMethods())
         {
             var attrMerhod = method.GetCustomAttribute<DisplayNameAttribute>();
-            if (attrMerhod!=null) output.Add($"{method.Name} - {attrMerhod.DisplayName}");
+            if (attrMerhod!=null) Console.WriteLine($"{method.Name} - {attrMerhod.DisplayName}");
         }
-
-        return output;
     }
 }
