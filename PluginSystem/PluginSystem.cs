@@ -3,13 +3,13 @@ using CommandLib;
 
 namespace PluginSystem;
 
-class Program
+public class Program
 {
-    static List<Type> allPluginTypes = new List<Type>();
-    static List<Type> sortedPlugins = new List<Type>();
-    static HashSet<string> visited = new HashSet<string>();
+public static List<Type> allPluginTypes = new List<Type>();
+    public static List<Type> sortedPlugins = new List<Type>();
+    public static HashSet<string> visited = new HashSet<string>();
 
-    static void SortPlugins(Type type)
+    public static void SortPlugins(Type type)
     {
         if (visited.Contains(type.Name)) return;
 
@@ -34,14 +34,24 @@ class Program
 
     public static void Main()
     {
-        string dllPath = "/home/artem/учёбаб/practice_2026/Plugins/bin/Debug/net8.0/Plugins.dll";
-        Assembly assembly = Assembly.LoadFrom(dllPath);
+        string[] dllFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.dll");
 
-        foreach (var type in assembly.GetTypes())
+        foreach (var dllPath in dllFiles)
         {
-            if (type.IsClass)
+            try
             {
-                allPluginTypes.Add(type);
+                Assembly assembly = Assembly.LoadFrom(dllPath);
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (type.IsClass && !type.IsAbstract && typeof(ICommand).IsAssignableFrom(type))
+                    {
+                        allPluginTypes.Add(type);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"Ошибка загрузки плагина {Path.GetFileName(dllPath)}");
             }
         }
 
@@ -52,8 +62,15 @@ class Program
 
         foreach (var type in sortedPlugins)
         {
-            var instance = (ICommand)Activator.CreateInstance(type);
-            instance.Execute();
+            try
+            {
+                var instance = (ICommand)Activator.CreateInstance(type);
+                instance?.Execute();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Ошибка выполнения плагина {type.Name}]: {ex.Message}");
+            }
         }
     }
 }
