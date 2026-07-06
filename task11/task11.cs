@@ -39,6 +39,11 @@ public static class CalculatorGenerator
         {
             var result = compilation.Emit(ms);
 
+            if (!result.Success)
+            {
+                throw new InvalidOperationException("Ошибка компиляции");
+            }
+
             ms.Seek(0, SeekOrigin.Begin);
             Assembly assembly = Assembly.Load(ms.ToArray());
             
