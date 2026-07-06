@@ -70,4 +70,43 @@ public class SpaceshipTests
             Assert.Equal(i, cruiser.Missles);
         }
     }
+
+    [Fact]
+    public void FirstCheck_ShouldHaveDefaultValues()
+    {
+        var cruiser = new Cruiser();
+        var fighter = new Fighter();
+
+        Assert.Equal(0, cruiser.Coordinates);
+        Assert.Equal(0, cruiser.Angle);
+        Assert.Equal(10, cruiser.Missles);
+
+        Assert.Equal(0, fighter.Coordinates);
+        Assert.Equal(0, fighter.Angle);
+        Assert.Equal(20, fighter.Missles);
+    }
+
+    [Fact]
+    public void ZeroMissileFire_ShouldStayOnZeroValue()
+    {
+        var cruiser = new Cruiser();
+        
+        for (int i = 0; i < 10; i++)
+        {
+            cruiser.Fire();
+        }
+        Assert.Equal(0, cruiser.Missles);
+
+        cruiser.Fire();
+        Assert.Equal(0, cruiser.Missles);
+    }
+
+    [Fact]
+    public void RotateNegativeAngle_ShouldCalculateCorrectly()
+    {
+        var fighter = new Fighter();
+        
+        fighter.Rotate(-90);
+        Assert.Equal(-90, fighter.Angle);
+    }
 }
