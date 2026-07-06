@@ -6,29 +6,70 @@ class Program
 {
     public static void Main(string[] args)
     {
-        string dllPath = args[0];
-        Assembly assembly = Assembly.LoadFrom(dllPath);
-
-        foreach (var type in assembly.GetTypes())
+        if (args.Length == 0)
         {
-            Console.WriteLine($"\nКласс: {type.Name}");
+            Console.WriteLine("Ошибка: Не указан путь к DLL.");
+            return;
+        }
 
-            foreach (var attr in type.GetCustomAttributes())
-                Console.WriteLine($"  Атрибут: {attr}");
+        string dllPath = Path.GetFullPath(args[0]);
 
-            foreach (var ctor in type.GetConstructors())
+        if (!File.Exists(dllPath))
+        {
+            Console.WriteLine($"Ошибка: Файл не найден: {dllPath}");
+            return;
+        }
+
+        try
+        {
+            Assembly assembly = Assembly.LoadFrom(dllPath);
+            
+            foreach (var type in assembly.GetTypes())
             {
-                Console.WriteLine($"  Конструктор: {ctor}");
-                foreach (var p in ctor.GetParameters())
-                    Console.WriteLine($"    {p.Name} ({p.ParameterType.Name})");
-            }
+                if (!type.IsClass) continue;
 
-            foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
-            {
-                Console.WriteLine($"  Метод: {method.Name}");
-                foreach (var p in method.GetParameters())
-                    Console.WriteLine($"    {p.Name} ({p.ParameterType.Name})");
+                Console.WriteLine($"\nКласс: {type.FullName}");
+
+                foreach (var attr in type.GetCustomAttributes())
+                {
+                    Console.WriteLine($"  Атрибут класса: {attr.GetType().Name}");
+                }
+
+                foreach (var ctor in type.GetConstructors())
+                {
+                    Console.WriteLine($"  Конструктор: {ctor.Name}");
+                    foreach (var p in ctor.GetParameters())
+                    {
+                        Console.WriteLine($"    Параметр: {p.Name} ({p.ParameterType.Name})");
+                    }
+                }
+
+                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                foreach (var method in methods)
+                {
+                    if (method.IsSpecialName) continue;
+
+                    Console.WriteLine($"  Метод: {method.Name}");
+
+                    foreach (var attr in method.GetCustomAttributes())
+                    {
+                        Console.WriteLine($"    Атрибут метода: {attr.GetType().Name}");
+                    }
+
+                    foreach (var p in method.GetParameters())
+                    {
+                        Console.WriteLine($"    Параметр: {p.Name} ({p.ParameterType.Name})");
+                    }
+                }
             }
+        }
+        catch (ReflectionTypeLoadException)
+        {
+            Console.WriteLine($"Ошибка загрузки типов");
+        }
+        catch (Exception)
+        {
+            Console.WriteLine($"Ошибка при работе с DLL");
         }
     }
 }
