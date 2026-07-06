@@ -8,7 +8,7 @@ class Program
     {
         if (args.Length == 0)
         {
-            Console.WriteLine("Ошибка: Не указан путь к DLL.");
+            Console.WriteLine("Ошибка: Не указан путь к DLL");
             return;
         }
 
