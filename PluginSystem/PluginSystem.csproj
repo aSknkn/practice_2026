@@ -2,6 +2,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CommandLib\CommandLib.csproj" />
+    <None Include="..\PluginSystem\bin\Debug\net8.0\Plugins.dll" Link="Plugins.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <PropertyGroup>
