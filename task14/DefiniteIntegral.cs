@@ -2,7 +2,22 @@ namespace task14;
 
 public class DefiniteIntegral
 {
-    public static double Solve(double a, double b, Func<double, double> function, double step, int threadsNumber)
+    public static double SolveSingleThread(double a, double b, Func<double, double> function, double step)
+    {
+        double totalSum = 0.0;
+        int totalSteps = (int)Math.Ceiling((b - a) / step);
+        
+        for (int i = 0; i < totalSteps; i++)
+        {
+            double x1 = a + i * step;
+            double x2 = x1 + step;
+            totalSum += (function(x1) + function(x2)) / 2.0 * step;
+        }
+        
+        return totalSum;
+    }
+
+    public static double SolveMultiThread(double a, double b, Func<double, double> function, double step, int threadsNumber)
     {
         double totalSum = 0.0;
 
@@ -10,18 +25,19 @@ public class DefiniteIntegral
         int stepsPerThread = totalSteps / threadsNumber;
         int remainingSteps = totalSteps % threadsNumber;
 
-        using Barrier barrier = new Barrier(threadsNumber + 1);
+        Thread[] threads = new Thread[threadsNumber];
 
         for (int i = 0; i < threadsNumber; i++)
         {
             int currentThreadIndex = i;
 
-            Thread thread = new Thread(() =>
+            threads[i] = new Thread(() =>
             {
                 int localSteps = stepsPerThread + (currentThreadIndex == threadsNumber - 1 ? remainingSteps : 0);
-                double localA = a + currentThreadIndex * stepsPerThread * step;
+                
+                int startIndex = currentThreadIndex * stepsPerThread;
+                double localA = a + startIndex * step;
                 double localSum = 0.0;
-                double initialValue, computedValue;
                 
                 for (int j = 0; j < localSteps; j++)
                 {
@@ -30,22 +46,23 @@ public class DefiniteIntegral
                     localSum += (function(x1) + function(x2)) / 2.0 * step;
                 }
 
+                double initialValue, computedValue;
                 do
                 {
                     initialValue = totalSum;
                     computedValue = initialValue + localSum;
                 }
                 while (initialValue != Interlocked.CompareExchange(ref totalSum, computedValue, initialValue));
-                
-
-                barrier.SignalAndWait();
-
             });
 
-            thread.Start();
+            threads[i].Start();
         }
 
-        barrier.SignalAndWait();
+        foreach (var thread in threads)
+        {
+            thread.Join();
+        }
+
         return totalSum;
     }
 }
