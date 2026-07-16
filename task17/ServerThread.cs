@@ -18,12 +18,14 @@ namespace task17
         private readonly Thread _thread;
         private readonly IExceptionHandler _exceptionHandler;
         private volatile bool _hardStopRequested;
+        private readonly IScheduler _scheduler;
 
         public Thread WorkerThread => _thread;
         public bool IsAlive => _thread.IsAlive;
 
-        public ServerThread(IExceptionHandler exceptionHandler = null)
+        public ServerThread(IScheduler scheduler = null, IExceptionHandler exceptionHandler = null)
         {
+            _scheduler = scheduler ?? new RoundRobinScheduler();
             _exceptionHandler = exceptionHandler;
             _thread = new Thread(Run) { IsBackground = true };
             _thread.Start();
@@ -43,22 +45,36 @@ namespace task17
         }
 
         private void Run()
-        {
-            foreach (var command in _queue.GetConsumingEnumerable())
+     {
+        while (true)
+         {
+            if (!_scheduler.HasCommand())
             {
-                try
-                {
-                    command.Execute();
-                }
-                catch (Exception ex)
-                {
-                    _exceptionHandler?.Handle(ex, command);
-                }
-
-                if (_hardStopRequested)
+                if (!_queue.TryTake(out var awaited, Timeout.Infinite))
                     break;
+                _scheduler.Add(awaited);
             }
-        }
+
+            while (_queue.TryTake(out var newCmd, 0))
+                _scheduler.Add(newCmd);
+
+            var cmd = _scheduler.Select();
+
+             try
+             {
+                 cmd.Execute();
+                if (cmd is ILongRunningCommand lr && !lr.IsCompleted)
+                    _scheduler.Add(cmd);
+             }
+             catch (Exception ex)
+             {
+                 _exceptionHandler?.Handle(ex, cmd);
+             }
+
+             if (_hardStopRequested)
+                 break;
+         }
+     }
 
         internal void RequestHardStop()
         {
